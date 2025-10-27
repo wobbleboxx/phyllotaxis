@@ -1,18 +1,30 @@
 import React, { useRef, useEffect } from 'react';
 import { Seed } from '../types';
 
-const PhyllotaxisCanvas: React.FC = () => {
+interface PhyllotaxisCanvasProps {
+  radiusScalingFactor: number;
+  animationSpeed: number;
+}
+
+const PhyllotaxisCanvas: React.FC<PhyllotaxisCanvasProps> = ({ radiusScalingFactor, animationSpeed }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const seedsRef = useRef<Seed[]>([]);
   const animationFrameIdRef = useRef<number>(0);
   const frameCounterRef = useRef<number>(0);
+  const radiusScalingFactorRef = useRef(radiusScalingFactor);
+  const animationSpeedRef = useRef(animationSpeed);
+
+  // Update refs when props change
+  useEffect(() => {
+    radiusScalingFactorRef.current = radiusScalingFactor;
+    animationSpeedRef.current = animationSpeed;
+  }, [radiusScalingFactor, animationSpeed]);
 
   // Constants for the simulation
   const GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
   const GOLDEN_ANGLE = 2 * Math.PI * (2 - GOLDEN_RATIO);
-  const SEED_BASE_RADIUS = 2.5;
   const SEED_BASE_SPEED = 1.2;
-  const SPENDER_RADIUS = 20;
+  const SPENDER_RADIUS = 2;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -50,7 +62,7 @@ const PhyllotaxisCanvas: React.FC = () => {
       const newSeed: Seed = {
         angle: newSeedAngle,
         distance: SPENDER_RADIUS,
-        radius: SEED_BASE_RADIUS,
+        radius: 0, // Initial radius, will be updated immediately below.
         speed: SEED_BASE_SPEED,
         color: `hsl(0, 90%, 70%)`
       };
@@ -60,7 +72,7 @@ const PhyllotaxisCanvas: React.FC = () => {
       const updatedSeeds: Seed[] = [];
       for (const seed of seedsRef.current) {
         // Update distance
-        seed.distance += seed.speed;
+        seed.distance += seed.speed * animationSpeedRef.current;
         
         // Only keep seeds that are within the canvas bounds
         if (seed.distance < maxDistance) {
@@ -70,9 +82,8 @@ const PhyllotaxisCanvas: React.FC = () => {
           const x = centerX + seed.distance * Math.cos(seed.angle);
           const y = centerY + seed.distance * Math.sin(seed.angle);
 
-          // Update radius based on distance (age) - older seeds are bigger
-          const maxGrowth = 7; // The max additional radius for seeds at the edge
-          seed.radius = SEED_BASE_RADIUS + (seed.distance / maxDistance) * maxGrowth;
+          // Update radius based on distance using the latest value from the slider.
+          seed.radius = radiusScalingFactorRef.current * Math.sqrt(seed.distance);
 
           // Update color based on distance
           const hue = (seed.distance / 4) % 360;
@@ -107,14 +118,14 @@ const PhyllotaxisCanvas: React.FC = () => {
       ctx.fillStyle = '#06b6d4'; // cyan-500
       ctx.beginPath();
       ctx.moveTo(SPENDER_RADIUS, -4);
-      ctx.lineTo(SPENDER_RADIUS + 15, 0);
+      ctx.lineTo(SPENDER_RADIUS + 4, 0);
       ctx.lineTo(SPENDER_RADIUS, 4);
       ctx.closePath();
       ctx.fill();
       
       ctx.restore();
 
-      frameCounterRef.current++;
+      frameCounterRef.current += animationSpeedRef.current;
       animationFrameIdRef.current = requestAnimationFrame(animate);
     };
 
