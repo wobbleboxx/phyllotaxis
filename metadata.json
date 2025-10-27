@@ -1,0 +1,5 @@
+{
+  "name": "Golden Ratio Seed Spender",
+  "description": "A mesmerizing visualizer where a central 'spender' rotates and emits seeds at the golden angle, creating a beautiful, organic phyllotaxis pattern. The seeds travel outwards, changing color to form vibrant, spiraling rings.",
+  "requestFramePermissions": []
+}
