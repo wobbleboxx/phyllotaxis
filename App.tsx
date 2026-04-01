@@ -1,63 +1,70 @@
-import React, { useState } from 'react';
-import PhyllotaxisCanvas from './components/PhyllotaxisCanvas';
+import React, { useEffect, useState } from 'react';
+import PhyllotaxisCanvas from './PhyllotaxisCanvas';
 
-const App: React.FC = () => {
-  const [radiusScalingFactor, setRadiusScalingFactor] = useState(1.55);
-  const [animationSpeed, setAnimationSpeed] = useState(1.0);
+const App = () => {
+    const [angle, setAngle] = useState(() => {
+        const saved = localStorage.getItem('angle');
+        return saved ? JSON.parse(saved) : 137.5;
+    });
+    const [radius, setRadius] = useState(() => {
+        const saved = localStorage.getItem('radius');
+        return saved ? JSON.parse(saved) : 200;
+    });
+    const [turns, setTurns] = useState(() => {
+        const saved = localStorage.getItem('turns');
+        return saved ? JSON.parse(saved) : 5;
+    });
+    const [colorMode, setColorMode] = useState(() => {
+        const saved = localStorage.getItem('colorMode');
+        return saved ? JSON.parse(saved) : 'random';
+    });
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center font-sans p-4 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full bg-grid-gray-700/[0.2] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-      <div className="relative z-10 text-center mb-8">
-        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400">
-          Golden Ratio Seed Spender
-        </h1>
-        <p className="mt-4 text-lg text-neutral-300 max-w-2xl mx-auto">
-          A mesmerizing visualization of phyllotaxis. A central emitter rotates and shoots seeds at the golden angle (≈137.5°), creating a natural spiral pattern seen in sunflowers and pinecones.
-        </p>
-      </div>
-      <div className="relative z-10 w-full max-w-4xl aspect-square shadow-2xl shadow-cyan-500/10 rounded-lg overflow-hidden border border-cyan-500/20">
-         <PhyllotaxisCanvas 
-            radiusScalingFactor={radiusScalingFactor}
-            animationSpeed={animationSpeed}
-         />
-      </div>
-      <div className="relative z-10 mt-8 w-full max-w-md text-center">
-        <label htmlFor="radius-slider" className="block text-lg text-neutral-300 mb-2 font-medium">
-          Seed Growth Factor: {radiusScalingFactor.toFixed(2)}
-        </label>
-        <input
-          id="radius-slider"
-          type="range"
-          min="0.55"
-          max="1.55"
-          step="0.01"
-          value={radiusScalingFactor}
-          onChange={(e) => setRadiusScalingFactor(parseFloat(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-          aria-label="Seed Growth Factor Slider"
-        />
-        <label htmlFor="speed-slider" className="block text-lg text-neutral-300 mt-6 mb-2 font-medium">
-          Animation Speed: {animationSpeed.toFixed(2)}x
-        </label>
-        <input
-          id="speed-slider"
-          type="range"
-          min="0.1"
-          max="3.0"
-          step="0.05"
-          value={animationSpeed}
-          onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-          aria-label="Animation Speed Slider"
-        />
-      </div>
-       <footer className="relative z-10 mt-4 text-center text-neutral-500 text-sm">
-        <p>Each new seed is placed at an angle of 137.5° relative to the last.</p>
-        <p>This irrational angle ensures that no two seeds ever overlap perfectly, filling the space optimally.</p>
-      </footer>
-    </div>
-  );
+    useEffect(() => {
+        localStorage.setItem('angle', JSON.stringify(angle));
+    }, [angle]);
+    useEffect(() => {
+        localStorage.setItem('radius', JSON.stringify(radius));
+    }, [radius]);
+    useEffect(() => {
+        localStorage.setItem('turns', JSON.stringify(turns));
+    }, [turns]);
+    useEffect(() => {
+        localStorage.setItem('colorMode', JSON.stringify(colorMode));
+    }, [colorMode]);
+
+    return (
+        <div style={{ textAlign: 'center' }}>
+            <h1>Phyllotaxis</h1>
+            <div>
+                <label>
+                    Angle: 
+                    <input type='range' min='0' max='360' value={angle} onChange={(e) => setAngle(e.target.value)} />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Radius: 
+                    <input type='range' min='0' max='500' value={radius} onChange={(e) => setRadius(e.target.value)} />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Turns: 
+                    <input type='range' min='0' max='10' step='1' value={turns} onChange={(e) => setTurns(e.target.value)} />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Color Mode: 
+                    <select value={colorMode} onChange={(e) => setColorMode(e.target.value)}>
+                        <option value='random'>Random</option>
+                        <option value='gradient'>Gradient</option>
+                    </select>
+                </label>
+            </div>
+            <PhyllotaxisCanvas angle={angle} radius={radius} turns={turns} colorMode={colorMode} />
+        </div>
+    );
 };
 
 export default App;
